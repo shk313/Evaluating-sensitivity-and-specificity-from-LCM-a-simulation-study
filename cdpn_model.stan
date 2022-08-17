@@ -16,20 +16,20 @@ parameters {
   
   real<lower=0,upper=1> prev;
   
-  vector[N] b;
-  real<lower=0> sd_pos;
-  real<lower=0> sd_neg;
+  vector[N] RE;
+  real<lower=0> bpos;
+  real<lower=0> bneg;
   
   real<lower=0.5,upper=1> a11;
   real<lower=1-inv_logit(logit(a11)*2),upper=1> a12;
   real<lower=0,upper=1> a21;
-  real<lower=1-inv_logit(logit(a21)-sd_pos*2),upper=1> a22;
+  real<lower=1-inv_logit(logit(a21)-bpos*2),upper=1> a22;
   real<lower=0,upper=1> a31;
-  real<lower=1-inv_logit(logit(a31)-sd_pos*2),upper=1> a32;
+  real<lower=1-inv_logit(logit(a31)-bpos*2),upper=1> a32;
   real<lower=0,upper=1> a41;
-  real<lower=1-inv_logit(logit(a41)-sd_pos*2),upper=1> a42;
+  real<lower=1-inv_logit(logit(a41)-bpos*2),upper=1> a42;
   real<lower=0,upper=1> a51;
-  real<lower=1-inv_logit(logit(a51)-sd_pos*2),upper=1> a52;
+  real<lower=1-inv_logit(logit(a51)-bpos*2),upper=1> a52;
 
 }
 
@@ -45,16 +45,16 @@ transformed parameters {
   
 
 // dependence in positives and negatives  
-  prob[1,1] = rep_vector(1-a11, N);
+  prob[1,1] = rep_vector(1-a11, N); // independent test 1
   prob[1,2] = rep_vector(a12, N);
-  prob[2,1] = inv_logit(logit(1-a21)+sd_neg*b);
-  prob[2,2] = inv_logit(logit(a22)+sd_pos*b);
-  prob[3,1] = inv_logit(logit(1-a31)+sd_neg*b);
-  prob[3,2] = inv_logit(logit(a32)+sd_pos*b);
-  prob[4,1] = inv_logit(logit(1-a41)+sd_neg*b);
-  prob[4,2] = inv_logit(logit(a42)+sd_pos*b);
-  prob[5,1] = inv_logit(logit(1-a51)+sd_neg*b);
-  prob[5,2] = inv_logit(logit(a52)+sd_pos*b);
+  prob[2,1] = inv_logit(logit(1-a21)+bneg*RE);
+  prob[2,2] = inv_logit(logit(a22)+bpos*RE);
+  prob[3,1] = inv_logit(logit(1-a31)+bneg*RE);
+  prob[3,2] = inv_logit(logit(a32)+bpos*RE);
+  prob[4,1] = inv_logit(logit(1-a41)+bneg*RE);
+  prob[4,2] = inv_logit(logit(a42)+bpos*RE);
+  prob[5,1] = inv_logit(logit(1-a51)+bneg*RE);
+  prob[5,2] = inv_logit(logit(a52)+bpos*RE);
 
 }
 
@@ -77,9 +77,9 @@ model {
   
   prev~beta(1,1); 
 
-  b~normal(0,1);
-  sd_pos~gamma(1,1);
-  sd_neg~gamma(1,1);
+  RE~normal(0,1);
+  bpos~gamma(1,1);
+  bneg~gamma(1,1);
   
 
 

@@ -1,4 +1,4 @@
-
+/// Model 4: Conditional dependence in disease negative individuals ///
 data {
   
   int<lower=1> M; // Number of different tests
@@ -16,19 +16,19 @@ parameters {
   
   real<lower=0,upper=1> prev;
   
-  vector[N] b;
-  real<lower=0,upper=5> sd_neg;
+  vector[N] RE;
+  real<lower=0,upper=5> bneg;
   
   real<lower=0,upper=1> a12;
   real<lower=1-inv_logit(logit(a12)*2),upper=1> a11;
   real<lower=0,upper=1> a22;
-  real<lower=1-inv_logit(logit(a22)-sd_neg*2),upper=1> a21;
+  real<lower=1-inv_logit(logit(a22)-bneg*2),upper=1> a21;
   real<lower=0,upper=1> a32;
-  real<lower=1-inv_logit(logit(a32)-sd_neg*2),upper=1> a31;
+  real<lower=1-inv_logit(logit(a32)-bneg*2),upper=1> a31;
   real<lower=0,upper=1> a42;
-  real<lower=1-inv_logit(logit(a42)-sd_neg*2),upper=1> a41;
+  real<lower=1-inv_logit(logit(a42)-bneg*2),upper=1> a41;
   real<lower=0,upper=1> a52;
-  real<lower=1-inv_logit(logit(a52)-sd_neg*2),upper=1> a51;
+  real<lower=1-inv_logit(logit(a52)-bneg*2),upper=1> a51;
 
 
 }
@@ -38,22 +38,19 @@ transformed parameters {
   simplex[2] theta; // prob infected or not infected
   vector[N] prob[M,2];   
 
-
-   
   theta[1] = 1-prev;
   theta[2] = prev;
-  
 
 // dependence in negatives  
-  prob[1,1] = rep_vector(1-a11, N);
+  prob[1,1] = rep_vector(1-a11, N); // independent test 1
   prob[1,2] = rep_vector(a12, N);
-  prob[2,1] = inv_logit(logit(1-a21)+sd_neg*b);
+  prob[2,1] = inv_logit(logit(1-a21)+bneg*RE);
   prob[2,2] = rep_vector(a22, N);
-  prob[3,1] = inv_logit(logit(1-a31)+sd_neg*b);
+  prob[3,1] = inv_logit(logit(1-a31)+bneg*RE);
   prob[3,2] = rep_vector(a32, N);
-  prob[4,1] = inv_logit(logit(1-a41)+sd_neg*b);
+  prob[4,1] = inv_logit(logit(1-a41)+bneg*RE);
   prob[4,2] = rep_vector(a42, N);
-  prob[5,1] = inv_logit(logit(1-a51)+sd_neg*b);
+  prob[5,1] = inv_logit(logit(1-a51)+bneg*RE);
   prob[5,2] = rep_vector(a52, N);
   // //
 
@@ -77,8 +74,8 @@ model {
 
   prev~beta(1,1); 
 
-  b~normal(0,1);
-  sd_neg~gamma(1,1);
+  RE~normal(0,1);
+  bneg~gamma(1,1);
 
 
   for(n in 1:N){
